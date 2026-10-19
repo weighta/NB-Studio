@@ -98,7 +98,7 @@ public static class FbxExporter
             conns.Add("C", "OO", modelId, 0L);
 
             string? tex = ObjExporter.DiffuseTexture(d);
-            string mat = tex != null ? ObjExporter.TextureFileStem(tex) : "untextured";
+            string mat = ObjExporter.MaterialName(d) ?? "untextured";
             if (!materials.TryGetValue(mat, out long matId))
             {
                 matId = _nextId++; materials[mat] = matId;

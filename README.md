@@ -267,7 +267,7 @@ recomputed), and the game's Photo Album shows it. Dropping packages on `NBModStu
 - **Executable mods** from the *Mods* menu: Change Vehicle in Showdown Town, destructible town vehicles, all parts
   unlocked, bigger world and garage, longer draw distance, part limits, co-op hooks and more, as Xenia patches or
   baked into `default.xex`.
-- **reNut custom parts** (*Build > reNut Parts*, new; arrives in the next release): new vehicle parts for
+- **reNut custom parts** (*Build > reNut Parts*, new in 1.24): new vehicle parts for
   [reNut](https://github.com/masterspike52/reNut), the native PC version. Part files in the workspace's
   `renut\parts` folder, your own OBJ models built from `renut\models.json` into bundles of the mod's own (with
   collision, footprints, textures and wheels that spin), a checker that reads the parts the way reNut does, and

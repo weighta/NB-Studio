@@ -87,7 +87,7 @@ public static class RenutModels
         int sym = c.Symbols.FindIndex(s => AssetIds.DisplayName(s) == tpl) + 1;
         var ma = NB.Core.Models.ModelAsset.Parse(c, sym);
         var buffers = turning ? PartFactory.TurningBuffers(ma) : null;
-        return ma.Draws.Where(x => buffers == null || buffers.Contains(x.VbRecord)).Select(x => NB.Core.Models.ObjExporter.DiffuseTexture(x)).Where(x => x != null)
+        return ma.Draws.Where(x => buffers == null || buffers.Contains(x.VbRecord)).Select(x => NB.Core.Models.ObjExporter.MaterialTexture(x)).Where(x => x != null)
             .Select(x => NB.Core.Models.ObjExporter.TextureFileStem(x!)).Distinct().ToList();
     }
 

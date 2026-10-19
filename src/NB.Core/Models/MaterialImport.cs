@@ -69,7 +69,7 @@ public static class MaterialImport
 
     public sealed record Result(Plan Plan, ModelImporter.Result Geometry, List<string> Textures, List<string> Notes);
 
-    static string? MatOf(MeshDraw x) => ObjExporter.DiffuseTexture(x) is string t ? ObjExporter.TextureFileStem(t) : null;
+    static string? MatOf(MeshDraw x) => ObjExporter.MaterialName(x);
     static bool HasUv(MeshDraw x) => x.Layout.Any(e => e.Format is VtxFormat.k_16_16_FLOAT or VtxFormat.k_32_32_FLOAT);
     static string KeyOf(ImportMesh m) => m.Material?.Name ?? m.Name;
 

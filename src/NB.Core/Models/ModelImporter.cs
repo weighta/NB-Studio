@@ -116,7 +116,7 @@ public static class ModelImporter
         var instancedVbs = m.Draws.Where(x => x.Instanced).Select(x => x.VbRecord).ToHashSet();
         if (instancedVbs.Count > 0 && meshes.Count > 0)   // no meshes at all: every draw (instanced ones too) draws nothing
         {
-            bool mapped = meshes.Any(x => m.Draws.Any(d => ObjExporter.DiffuseTexture(d) is string t && string.Equals(ObjExporter.TextureFileStem(t), x.Name, StringComparison.OrdinalIgnoreCase)));
+            bool mapped = meshes.Any(x => m.Draws.Any(d => ObjExporter.MaterialNames(d).Contains(x.Name, StringComparer.OrdinalIgnoreCase)));
             if (!mapped) throw new InvalidDataException("this model uses instanced draws (index = vertex*4 + instance); imported geometry would be drawn with random instance transforms. Use a model without instanced draws as the target/template (see NB.Cli model-survey: 'instanced 0'), or import by material.");
             excludeVbRecords = new HashSet<int>((excludeVbRecords ?? new HashSet<int>()).Concat(instancedVbs));
             notes.Add($"{instancedVbs.Count} instanced vertex buffer(s) left out of the import");
@@ -130,8 +130,9 @@ public static class ModelImporter
         // Blender keeps), every draw gets the merged meshes of its own material — draws that share a vertex buffer
         // (brass / wood / slate of one building) keep separate materials. LOD draws of one material share the geometry.
         // Draws whose material has no mesh draw nothing.
-        string? MatOf(MeshDraw x) => ObjExporter.DiffuseTexture(x) is string t ? ObjExporter.TextureFileStem(t) : null;
         var byName = meshes.GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => Merge(g.ToList()), StringComparer.OrdinalIgnoreCase);
+        // the draw's material name, or its 1.23.6 name when the import uses that one
+        string? MatOf(MeshDraw x) => ObjExporter.MaterialNames(x).FirstOrDefault(byName.ContainsKey) ?? ObjExporter.MaterialName(x);
         bool byMaterial = (forceByMaterial || meshes.Count != m.Draws.Count) && m.Draws.Any(x => MatOf(x) is string mt && byName.ContainsKey(mt));
         bool perDraw = !byMaterial && meshes.Count == m.Draws.Count;
         if (byMaterial)

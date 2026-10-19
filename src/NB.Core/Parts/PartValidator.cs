@@ -52,7 +52,7 @@ public static class PartValidator
             t.Model = me.Name;
             var mc = ws.LoadResident(me.Bundle);
             var ma = ModelAsset.Parse(mc, me.Symbol);
-            t.DiffuseStems = ma.Draws.Select(x => ObjExporter.DiffuseTexture(x)).Where(x => x != null)
+            t.DiffuseStems = ma.Draws.Select(x => ObjExporter.MaterialTexture(x)).Where(x => x != null)
                 .Select(x => ObjExporter.TextureFileStem(x!)).Distinct().ToList();
         }
         return t;

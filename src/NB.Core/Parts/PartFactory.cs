@@ -306,7 +306,7 @@ public static class PartFactory
         var animated = ma.Draws.GroupBy(x => x.VbRecord).Where(g => g.Any(x => !lodNodes.Contains(x.Node) && x.Node > 3)).Select(g => g.Key).ToHashSet();
         var turning = TurningBuffers(ma);
         string Final(string tplStem) => spec.Retarget.TryGetValue(tplStem, out var t) ? ObjExporter.TextureFileStem(t.Replace("aid_texture_banjox_", "")) : tplStem;
-        var stems = ma.Draws.Where(x => !spec.Spins || turning.Contains(x.VbRecord)).Select(x => ObjExporter.DiffuseTexture(x)).Where(x => x != null)
+        var stems = ma.Draws.Where(x => !spec.Spins || turning.Contains(x.VbRecord)).Select(x => ObjExporter.MaterialTexture(x)).Where(x => x != null)
             .Select(x => ObjExporter.TextureFileStem(x!)).Distinct().ToList();
         string which = spec.Spins ? "a colour texture on the template's turning part" : "a diffuse texture of the model";
         var named = new List<ImportMesh>();

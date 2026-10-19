@@ -11,7 +11,7 @@ namespace NB.Multiplayer.Services;
 /// </summary>
 public static class StudioManager
 {
-    public const string Repo = "weighta/NB-Studio-Banjo-Kazooie-Nuts-and-Bolts-World-Editor-";
+    public const string Repo = "weighta/NB-Studio";
     public static string ReleasesPage => $"https://github.com/{Repo}/releases";
     public static string ManagedDir => Path.Combine(AppSettings.Root, "NB-Studio");
 

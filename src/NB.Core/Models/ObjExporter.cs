@@ -16,6 +16,32 @@ public static class ObjExporter
     /// <summary>Picks the texture used as diffuse colour for a draw. Without a colour texture: another plain texture
     /// (a decal), else the ambient-occlusion map, else the specular map, else a mask, else none (neutral grey). A normal /
     /// bump map is never a colour (it showed purple-blue: Banjoland's gear fence, sign posts, toilet roll …).</summary>
+    /// <summary>
+    /// The texture a draw's material is named after (OBJ/FBX material names, part and model import mappings): the colour
+    /// texture, else the first texture that isn't a normal or specular map, else the first. Unlike
+    /// <see cref="DiffuseTexture"/> it can be a velvet or reflection map; it stays as it was before 1.23.6 so part specs
+    /// and exported models keep their material names.
+    /// </summary>
+    public static string? MaterialTexture(MeshDraw d)
+    {
+        var colour = d.Textures.FirstOrDefault(t => t.Texture.Contains("colour") || t.Texture.Contains("color") || t.Texture.Contains("diffuse"));
+        if (colour.Texture != null) return colour.Texture;
+        var nonNormal = d.Textures.Where(t => !t.Texture.Contains("normal") && !t.Texture.Contains("_nm") && !t.Texture.Contains("spec")).OrderBy(t => t.Slot).FirstOrDefault();
+        return nonNormal.Texture ?? d.Textures.OrderBy(t => t.Slot).Select(t => t.Texture).FirstOrDefault();
+    }
+
+    /// <summary>A draw's material name (<see cref="MaterialTexture"/>'s file stem); null without textures.</summary>
+    public static string? MaterialName(MeshDraw d) => MaterialTexture(d) is string t ? TextureFileStem(t) : null;
+
+    /// <summary>A draw's material names: <see cref="MaterialName"/>, and the colour texture's stem when it differs
+    /// (NB Studio 1.23.6 named exported materials after it).</summary>
+    public static IEnumerable<string> MaterialNames(MeshDraw d)
+    {
+        var a = MaterialName(d);
+        if (a != null) yield return a;
+        if (DiffuseTexture(d) is string t && TextureFileStem(t) is var b && !string.Equals(a, b, StringComparison.OrdinalIgnoreCase)) yield return b;
+    }
+
     public static string? DiffuseTexture(MeshDraw d)
     {
         var colour = d.Textures.FirstOrDefault(t => t.Texture.Contains("colour") || t.Texture.Contains("color") || t.Texture.Contains("diffuse"));
@@ -61,7 +87,7 @@ public static class ObjExporter
         {
             if (d.Positions.Length == 0 || d.Indices.Length < 3) continue;
             string? tex = DiffuseTexture(d);
-            string mat = tex != null ? TextureFileStem(tex) : "untextured";
+            string mat = MaterialName(d) ?? "untextured";
             if (materials.Add(mat))
             {
                 mtl.AppendLine($"newmtl {mat}\nKd 1 1 1");
