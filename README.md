@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="docs/images/banner.png" alt="NB Studio" width="100%">
+  <img src="docs/images/hero.jpg" alt="NB Studio: the world editor for Banjo-Kazooie: Nuts & Bolts" width="100%">
 </p>
 
+<h3 align="center">Open Showdown Town. Move L.O.G.'s palace. Paint the sky purple. Press F5 and drive through it.</h3>
+
 <p align="center">
-  <b>A world editor and modding toolkit for <i>Banjo-Kazooie: Nuts &amp; Bolts</i> (Xbox 360).</b><br>
-  Open the game's worlds in 3D, move and replace scenery, swap textures, import models and new vehicle parts, add AI
-  vehicles and routes, edit text, audio and video, and turn your changes into mods: small patches with a name, version
-  and category that anyone can apply to their own copy, or combine and play online with friends in
-  <a href="https://github.com/weighta/NB-Multiplayer">NB Multiplayer</a>.
+  <b>NB Studio</b> is a world editor and modding toolkit for <i>Banjo-Kazooie: Nuts &amp; Bolts</i> (Xbox 360).<br>
+  It opens every world and Act of the game in 3D, lit the way the game lights them, and lets you change almost
+  everything you can see (and hear), then test it in Xenia in seconds and share it as a small mod.
 </p>
 
 <p align="center">
@@ -18,22 +18,31 @@
 </p>
 
 <p align="center">
-  <a href="../../releases/latest"><img alt="Download" src="https://img.shields.io/badge/download-latest%20release-f5a623?style=for-the-badge"></a>
+  <a href="https://github.com/weighta/NB-Studio/releases/latest"><img alt="Download" src="https://img.shields.io/badge/download-latest%20release-f5a623?style=for-the-badge"></a>
   <a href="src"><img alt="Source code" src="https://img.shields.io/badge/source-C%23%20%2F%20.NET%209-512bd4?style=for-the-badge"></a>
+  <a href="https://github.com/weighta/NB-Multiplayer"><img alt="NB Multiplayer" src="https://img.shields.io/badge/play%20it%20online-NB%20Multiplayer-4cd08a?style=for-the-badge"></a>
 </p>
-
-<p align="center">
-  <img src="docs/images/studio-start.png" alt="NB Studio start page" width="100%">
-</p>
-<p align="center"><i>The start page: a different photo from the game every time (here a custom flying vehicle by the
-Space Needle of the Seattle mod). First time? NB Studio offers a 2-minute tour that explains every part of the window.</i></p>
 
 ---
 
 ## Contents
 
-- [What it does](#what-it-does)
-- [Screenshots](#screenshots)
+- [A tour of the editor](#a-tour-of-the-editor)
+  - [Every world, lit like the game](#every-world-lit-like-the-game)
+  - [Atmosphere: sky, light and fog for every Act](#atmosphere-sky-light-and-fog-for-every-act)
+  - [Move, copy and paste anything](#move-copy-and-paste-anything)
+  - [The collision editor](#the-collision-editor)
+  - [Cameras and cut-scene paths](#cameras-and-cut-scene-paths)
+  - [Music regions and your own music](#music-regions-and-your-own-music)
+  - [Vehicle Editor](#vehicle-editor)
+  - [Animations and FBX export](#animations-and-fbx-export)
+  - [Source maps (.vmf) as playable worlds](#source-maps-vmf-as-playable-worlds)
+  - [F5: Test in Xenia at 60 FPS](#f5-test-in-xenia-at-60-fps)
+  - [The Live (game) tab](#the-live-game-tab)
+  - [Textures, text, audio and video](#textures-text-audio-and-video)
+  - [Xbox 360 photo viewer](#xbox-360-photo-viewer)
+  - [Mods, patches and NB Multiplayer](#mods-patches-and-nb-multiplayer)
+- [Everything at a glance](#everything-at-a-glance)
 - [Installation](#installation)
 - [Tutorial: your first mod](#tutorial-your-first-mod)
 - [How the tool works](#how-the-tool-works)
@@ -44,108 +53,273 @@ Space Needle of the Seattle mod). First time? NB Studio offers a 2-minute tour t
 
 ---
 
-## What it does
+## A tour of the editor
 
-| Area | What you can do |
-|---|---|
-| **Worlds** | Open every world and Act (Showdown Town, Nutty Acres, LOGBOX 720, Banjoland, Terrarium of Terror, Spiral Mountain, World of Sports, the test track...) with terrain, scenery, markers, AI paths and collision, and every object the game places with a marker drawn with its real model: L.O.G.'s palace, the Jiggy bank, Jig-o-vends, cranes, doors, crates, notes, characters and act vehicles (*View > Objects at Markers*). Select, move, rotate, scale, duplicate and delete objects. |
-| **Undo, copy and paste** | **Ctrl+C / Ctrl+X / Ctrl+V** copy, cut and paste objects (a paste lands where the mouse points), **Del** deletes. **Ctrl+Z / Ctrl+Y** (or the toolbar buttons) undo and redo any change: moving, rotating and scaling, path links, and everything that writes the game files (model import, duplicate, delete, collision import, tag, atmosphere and texture saves). The Edit menu names the step. *File > Settings* sets how many steps are kept. |
-| **Models** | Preview any model in 3D, export to OBJ or FBX (with skeleton and skin for characters), import OBJ/FBX geometry to replace scenery, build new scenery from imported models. |
-| **Textures** | Decode all 14,049 textures (DXT1/3/5, DXN, CTX1, ARGB, cube and volume maps), browse a model's or world's textures in the texture library, export PNG, replace with your own image. |
-| **Collision** | View and import world collision (Havok 5.5 extended meshes); box collision for imported scenery. Right-click > *Show Collision of Selection* draws the selected object's own collision as a wireframe; the **Collision** button by the view modes shows it for everything in the scene. |
-| **Markers & paths** | Edit actor spawns, pickups, volumes, script triggers and AI path routes (the race paths the computer drivers follow), and add AI vehicles that drive your own routes. Path lines follow a node while you drag it, and characters walk your edited routes in game. |
-| **Characters' dialogue** | Click a character and the *Dialogue* tab lists their lines (any language) to edit and save. |
-| **Source maps (.vmf)** | *Tools > Import Source Map (.vmf)*: turn a Hammer map into playable Showdown Town geometry: brushes, displacements and collision, the map's own textures from your Source game, lights baked into lightmaps, the 3D skybox left out and tool textures (nodraw, clip...) hidden. Props are optional. |
-| **Vehicle parts** | Part Importer: build new garage parts (model, physics, stats, attach points, garage tier dialogs). |
-| **Vehicle Editor** | Open Xbox 360 vehicle saves (packages or extracted content files) and the game's own vehicles (e.g. the Burnin' Rubber racers), build with every part (search, 24 rotations, paint as in game, wheel and button settings, no part limit), and save back to a 360 package, the shared vehicle saves or the game. Drop a 360 vehicle onto a game vehicle to replace it. |
-| **Text, audio, video** | Edit in-game text in all languages, replace music and sound effects (XWB banks), replace videos. |
-| **Executable mods** | Toggle researched game-code changes (vehicles and Change Vehicle in town, destructible town vehicles, 2000-part vehicles, bigger world and garage, longer draw distance, all parts unlocked, debug menus...) as Xenia patches or baked into the executable. |
-| **For beginners** | A guided tour on the first start (and from *Help > Take the Tour*): it spotlights each part of the window and explains it in plain words, then walks you through your first mod in 5 steps. Opening a workspace reopens the world you were last in; *File > Open Recent* lists the workspaces you used last. |
-| **3D view** | Wireframe, Solid, Textured and **Rendered** views (switch in the corner of the 3D view). Every material is drawn with the game's own pixel shader, translated from the Xbox 360 shader code: metal, glass, reflections, texture tiling and colour come out as in the game. Rendered lights the world with the level's real lighting (sun, fill light, sky-and-ground ambient, shadows, fog), read from the level scripts; each world shows its own sky dome (also in Textured), and grass is placed the way the game places it (*View > Grass*). Blender-style editing: **G** move, **R** rotate, **T** scale, then **X/Y/Z** to lock an axis (shown as a coloured line), typed values; W A S D Q E fly. Select several objects (Shift/Ctrl-click, **B** or Ctrl+drag for a rectangle), **H** hides, **U** shows everything again. **Edit Collision** makes the world's collision selectable and editable (move, delete, add boxes and ramps). |
-| **Atmosphere & weather** | The *Atmosphere* tab edits each time of day's sky, light and fog with colour pickers and sliders (with a live preview in a running game); *World > Weather* adds falling snow. Everything Snowy Showdown Town needed can be done in NB Studio. |
-| **Testing** | **F5** plays the world you have open in Xenia right away (no title screen, menus or intro); Shift+F5 starts at the 3D view's camera, Ctrl+F5 at the title screen. Tweak a running game live (teleport, gravity, camera). |
-| **Sharing** | Export a `.nbpatch` mod: a small differential patch with only your changes, plus its name, version, category (map, vehicle parts, gameplay, visuals, audio, tweak, co-op), tags and description. It contains no game data; others apply it to their own copy with one click (with backup and rollback) or add it to NB Multiplayer's mod library. |
-| **Mods from modded folders** | Build > *Create Patch from a Modified Game Folder*: a game folder modded by hand becomes a mod. NB Studio compares it with the original game (size and SHA-256 of every retail file, shipped with the tool), shows what changed per file and asset (textures, models, markers, scripts, parts), recognises known executable tweaks in an edited `default.xex`, and fills in the category and tags. *Try it* starts the result in Xenia. |
-| **Combining mods** | Mods that change the same bundle are merged asset by asset; real conflicts are named down to the asset. Mods can carry *world edits* that are replayed on top of other mods (Showdown Town co-op works on any town this way). World edits can copy objparams, models and animations between bundles (shared string pools are re-pointed), set any asset's values, add AI routes and script commands, and make joint-subset models; a mod's edits run in one batch. The **Character Select** mod of NB Multiplayer (17 playable characters) is made only of world edits. |
-| **Xbox 360 photos** | Tools > *Xbox 360 Photo Viewer*: drop the photo packages your console saves with *Take Photo* (one or many) and the photo pops up: save it as PNG / JPEG / BMP, copy it (Ctrl+C) or drag it out. *Auto-extract* writes every dropped package's photo as a JPEG next to it. *Import Image into Package* (Ctrl+I) puts your own picture into a photo package (1280×720 JPEG and thumbnail, all package hashes recomputed); the game's Photo Album shows it. Dropping packages on `NBModStudio.exe` opens just the viewer. |
-| **Command line** | `cli/NB.Cli.exe`: every format tool, patch building and applying, combining mods (`stack-check`, `stack-apply`), mods from modded folders (`game-verify`, `game-diff`, `patch-from-folder`), world edits (`ops-apply`), Xbox 360 photos (`photo-extract`, `photo-import`), the tick-box tweak mods, AI routes and vehicles, scripted Xenia tests. |
+### Every world, lit like the game
+
+<p align="center">
+  <img src="docs/images/worlds-rendered.jpg" alt="Showdown Town, Nutty Acres, Banjoland, Terrarium of Terror, World of Sports and Spiral Mountain in NB Studio's Rendered view" width="100%">
+</p>
+
+Showdown Town, Nutty Acres, LOGBOX 720, Banjoland, Terrarium of Terror, Spiral Mountain, World of Sports, Banjo's
+House and the test track: every world and every Act opens in the 3D view with its terrain, scenery, water, grass, sky
+dome and everything the game places with markers. L.O.G.'s palace, the Jiggy bank, Jig-o-Vends, cranes, doors, crates,
+notes, Jinjo houses, act vehicles and the characters (in their idle pose) are drawn with their real models.
+
+The **Rendered** view runs a translated copy of each material's own Xbox 360 pixel shader, so metal, glass,
+reflections, texture tiling and tints come out as in the game. It lights the level with the light setup the level
+scripts run: sun, fill light, sky-and-ground ambient, shadows, two fog bands and the game's field of view. Wireframe,
+Solid and Textured are one click away, and the **Show** menu turns terrain, scenery, objects, grass, water, sky,
+markers, paths, cameras, music regions and collision on and off.
+
+<p align="center">
+  <img src="docs/images/studio-nutty-acres.jpg" alt="NB Studio with Nutty Acres Act 1 open in the Rendered view" width="100%">
+</p>
+<p align="center"><i>Nutty Acres, Act 1, in the full editor: worlds and Acts on the left, the 3D view in the middle, Properties,
+Tag Editor, Live (game), Dialogue and Animations on the right. The pink dots are the Act's notes and pickups.</i></p>
+
+Fly with **W A S D Q E** (Shift = fast, with a speed menu), look with the right mouse button, and each world remembers
+where you left the camera.
+
+### Atmosphere: sky, light and fog for every Act
+
+<p align="center">
+  <img src="docs/images/times-of-day.jpg" alt="The same Showdown Town street at morning, midday, afternoon and night" width="100%">
+</p>
+<p align="center"><i>One street, four light setups: Showdown Town's morning, midday, afternoon and night, straight from the game files.</i></p>
+
+The **Atmosphere** tab edits the sky, light and fog of every time of day in Showdown Town and of every Act in the other
+worlds: ambient and sun colour (with a live colour picker), sun intensity and direction, fog start, end, strength and
+colour, fill light, and the sky dome and its textures. A **3D preview** shows each change at once, shadows following the
+sun as you drag it. Presets (including a winter one) give you a starting point, and *World > Weather* adds falling snow.
+
+Tick **Live preview in the running game** and the colours, intensity and fog change in the game running in Xenia while you
+drag the sliders. Shared light setups (used by several Acts, or copied into several files) are named before saving, and
+every copy is written.
+
+<p align="center">
+  <img src="docs/images/studio-atmosphere.jpg" alt="The Atmosphere tab with Showdown Town's afternoon light setup and the 3D preview" width="100%">
+</p>
+
+### Move, copy and paste anything
+
+<p align="center">
+  <img src="docs/images/studio-object-editing.jpg" alt="Mumbo's Motors selected in Showdown Town with the move gizmo" width="100%">
+</p>
+<p align="center"><i>Mumbo's Motors selected in the Rendered view: one box for the selection, the gizmo at its centre, exact values in Properties.</i></p>
+
+- **Blender-style keys:** **G** moves, **R** rotates, **S** or **T** scales, then **X / Y / Z** locks an axis and a typed
+  number sets an exact amount. Or drag the gizmo, or type values in *Properties*.
+- **Select many:** Shift/Ctrl-click, **B** or Ctrl+drag for a rectangle, Ctrl+A. **H** hides, **U** shows everything again.
+- **Ctrl+C / Ctrl+V** copies scenery, and the copy is self-contained: its models, textures, lightmaps and collision are
+  packed, so you can paste it into **another world or another workspace**. A paste lands where the mouse points and is
+  one undo step. *Copy With Level Collision* brings the level collision inside the object's box along; *Copy Mesh Only*
+  (Ctrl+Shift+C) leaves it behind.
+- **Ctrl+X** lifts any object (Thomas, a warp pad, a camera, a crate) and **Ctrl+V** puts it down under the mouse.
+- **Undo everything** with Ctrl+Z / Ctrl+Y: moves, file writes, imports, atmosphere, collision and texture saves.
+  **Ctrl+S** saves everything pending, and nothing is lost by switching worlds: NB Studio asks first.
+- Duplicate, delete, import OBJ/FBX models in place of scenery, edit AI race routes and path links, move water, set the
+  player start, and edit characters' **dialogue** lines in every language.
+
+### The collision editor
+
+<p align="center">
+  <img src="docs/images/studio-collision.jpg" alt="Edit Collision: Showdown Town's collision drawn over the town, a window's collision triangles selected" width="100%">
+</p>
+
+**Edit Collision** decodes the world's Havok collision (606,538 triangles in Showdown Town, in a fraction of a second)
+and makes it clickable: pick a whole piece, a face or single triangles, or drag a rectangle. Move, rotate, scale, delete,
+copy and duplicate collision; add boxes, ramps and planes; build collision from an object's render mesh. *World > Save*
+rebuilds the collision with a search tree at the game's own resolution and keeps each triangle's surface material.
+Checked in the game: an added box blocks the vehicle, a deleted wall lets it drive through, and moving scenery moves its
+collision with it.
+
+### Cameras and cut-scene paths
+
+<p align="center">
+  <img src="docs/images/studio-cutscene-cameras.jpg" alt="The camera path of the L.O.G.'s palace intro cut-scene around the palace, with fixed cameras in cyan" width="100%">
+</p>
+<p align="center"><i>The fly-around of L.O.G.'s palace intro: 27 editable keys along a 25.7-second camera path. The cyan cameras are fixed views.</i></p>
+
+Fixed cameras are drawn as cyan cameras with their view cone: the **WARP TO** view of every warp pad, bolt-head
+close-ups, the Jiggy Bank and info points. Right-click to **Look Through Its Camera**, set a camera from the 3D view,
+or select a warp pad's camera; moving a warp pad takes its camera along. All 125 cut-scene cameras of Showdown Town can
+be shown as paths. Open one and its keys (one per second) are editable objects: move or turn a key and the path bends
+around it and fades into the neighbouring keys.
+
+### Music regions and your own music
+
+<p align="center">
+  <img src="docs/images/studio-music-regions.jpg" alt="Showdown Town's music regions with speaker labels; a region's tracks for each time of day in Properties" width="100%">
+</p>
+
+Showdown Town's music is one piece made of six synchronized district tracks (Market, Seaside, Docks, Park, Posh and
+L.O.G.), and **32 music regions** decide which one plays where. *Show > Music* draws them as coloured rings with speaker
+labels. Select a region to move or resize it, give it any of the game's **133 tracks** per time of day, preview it with
+▶, or **Replace…** the track with your own song (WAV, MP3, OGG, FLAC or M4A; mono, 22 kHz, loop and fit-to-length
+options, or "All six districts" at once). *Audio > Music* lists every track with where it plays, with Play, Replace…
+and Export WAV. Replacements were checked in Xenia in every music bank.
+
+### Vehicle Editor
+
+<p align="center">
+  <img src="docs/images/studio-vehicle-editor.jpg" alt="The Vehicle Editor with Mr. Fit's Burnin' Rubber racer, the Parts Store library and the AI-driver note" width="80%">
+</p>
+<p align="center">
+  <img src="docs/images/vehicles-game.jpg" alt="The L.O.G. Pizza Wagon, a 249-part test vehicle from the game, and the Game Vehicles picker" width="100%">
+</p>
+<p align="center"><i>Mr. Fit's Burnin' Rubber racer, the L.O.G. Pizza Wagon, a 249-part vehicle left in the game's files, and the Game Vehicles picker.</i></p>
+
+Build vehicles the way Mumbo's garage does, without its limits:
+
+- **Game Vehicles** lists all 275 vehicles in the game files by World › Act › challenge (the racers, Mr. Fit's and
+  Blubber's vehicles, shop blueprints, leftover demo and test vehicles), with search. One click opens one.
+- **Drag and drop parts** from a library laid out like the Parts Store: the preview snaps to the face under the mouse,
+  green when it attaches. Rotate to any of the 24 orientations, paint with the 13 garage colours or any RGB colour (drawn
+  with the game's paint formula), set wheel and propeller settings and A / B / X action buttons. No part limit.
+- **Checks** warns about floating parts, overlaps, missing AI seats and parts below the floor; AI drivers' vehicles get
+  a note and a **Use AI parts** button.
+- **Open and save** Xbox 360 vehicle saves (packages or extracted content files) and the game's own vehicles; drop a
+  360 vehicle onto a game vehicle to replace it. **My Vehicle Saves** is shared across workspaces and with NB
+  Multiplayer, and vehicles saved during an F5 test show up there.
+
+### Animations and FBX export
+
+<p align="center">
+  <img src="docs/images/studio-animations.jpg" alt="The Animations tab listing Thomas's 62 actions, Thomas waving in the 3D view" width="100%">
+</p>
+
+Select a character and the **Animations** tab lists every action it has and the animation each one plays (Thomas has
+62). Play, pause, loop, change the speed from 0.25× to 2× or scrub frame by frame, right in the world. **Export FBX…**
+writes the model, skeleton, skin, the chosen animation and its textures (tested in Blender). Any model can also be
+exported to OBJ or FBX from the right-click menu.
+
+### Source maps (.vmf) as playable worlds
+
+<p align="center">
+  <img src="docs/images/studio-vmf-import.png" alt="The Import Source Map dialog with its memory budget and import plan for oilrigv2_daytime" width="70%">
+</p>
+
+*Tools > Import Source Map (.vmf)* turns a Hammer map into playable Showdown Town geometry: brushes and displacements
+become textured models with collision, the map's textures come from your Source game's folders and VPKs, and its lights
+(`light`, `light_spot`, `light_environment`) are baked into lightmaps with shadows. Tool textures are never drawn, the
+3D skybox can be ported as full-size terrain, glass and cut-outs work, and the outer nodraw hull is dropped. Before
+anything is written, the dialog shows a memory budget against what a real Xbox 360 runs. Props can come from a folder
+of OBJ/FBX files.
+
+### F5: Test in Xenia at 60 FPS
+
+Press **F5** and NB's Xenia boots straight into the world or Act you have open, with no title screen, menus or intro:
+Showdown Town and Nutty Acres Act 1 are playable in about 30 seconds. **Shift+F5** starts you at the 3D view's camera,
+**Ctrl+F5** at the title screen.
+
+- Tests run at **60 FPS** by default (game speed unchanged), applied by Xenia in memory and never written into your
+  workspace or mods. Turn it off in *Mods > Test in Xenia at 60 FPS*. (Based on Margen67's 60 FPS patch.)
+- The test game skips Mumbo's tutorials and first-visit remarks, keeps its own save per workspace, can start from a full
+  all-unlocked save, and never touches your real saves.
+- Unsaved edits? F5 offers *Save all and test / Test last saved / Cancel*, and the status bar says what was tested.
+
+<p align="center">
+  <img src="docs/images/studio-mods-menu.png" alt="The Mods menu: executable mods, Test in Xenia at 60 FPS, part limit and garage build area" width="48%">
+  <img src="docs/images/studio-live-tab.png" alt="The Live (game) tab: teleport, bookmarks, nudge, gravity and photo camera" width="34%">
+</p>
+<p align="center"><i>Left: the Mods menu, with the researched executable mods and the 60 FPS test option. Right: the Live (game) tab.</i></p>
+
+### The Live (game) tab
+
+Attach to the game running in Xenia (it finds the F5 game by itself) and play with it while it runs: **teleport**
+Banjo or his vehicle to typed coordinates, to the 3D view's camera or to per-world **bookmarks**, **nudge** along an
+axis, change **gravity** (Moon, Zero-G, Heavy or anything in between; it sticks across level loads), move the 3D view to
+the player, or fly the game's photo camera to where the 3D view is looking from (it passes through walls).
+
+### Textures, text, audio and video
+
+<p align="center">
+  <img src="docs/images/studio-texture-library.jpg" alt="The texture library of Mumbo's Motors" width="70%">
+</p>
+
+- **Texture library:** every texture of a model or a whole world with thumbnails: export PNG, edit externally and apply,
+  replace one, or replace from a folder in one go (*Only this model* leaves other models alone). All 14,049 textures
+  decode (DXT1/3/5, DXN, CTX1, ARGB, cube and volume maps).
+- **Text** in all languages, the **Audio** tab's wave banks (play, export and replace sound effects; vgmstream is
+  included), and **video** replacement.
+- The **Part Importer** builds new garage parts: model, physics, stats, attach points and garage tier dialogs.
+
+### Xbox 360 photo viewer
+
+*Tools > Xbox 360 Photo Viewer*: drop the photo packages your console saves with *Take Photo* (one or many) and the
+photo pops up. Save it as PNG, JPEG or BMP, copy it, drag it out, or auto-extract every dropped package. *Import Image
+into Package* (Ctrl+I) puts your own picture into a photo package (1280×720 JPEG and thumbnail, package hashes
+recomputed), and the game's Photo Album shows it. Dropping packages on `NBModStudio.exe` opens just the viewer.
+
+### Mods, patches and NB Multiplayer
+
+<p align="center">
+  <img src="docs/images/snowy-night.jpg" alt="Snowy Showdown Town at night" width="70%">
+</p>
+<p align="center"><i>Snowy Showdown Town, the first official map mod (bundled with NB Multiplayer), made with these tools: snow textures, holly and bunting, camera-following snowfall and winter light, fog and skies.</i></p>
+
+- **Create Distributable Patch (.nbpatch):** a small differential patch with only your changes, plus its name,
+  version, category (maps, vehicle parts, gameplay, visuals, audio, tweaks, co-op), tags and description. It contains
+  no game data. Others apply it to their own copy with backup and rollback.
+- **Create Patch from a Modified Game Folder:** a folder modded by hand becomes a mod. NB Studio compares it with the
+  retail files, lists what changed per asset, recognises known executable tweaks and fills in the details.
+- **Executable mods** from the *Mods* menu: Change Vehicle in Showdown Town, destructible town vehicles, all parts
+  unlocked, bigger world and garage, longer draw distance, part limits, co-op hooks and more, as Xenia patches or
+  baked into `default.xex`.
+- **reNut custom parts** (*Build > reNut Parts*, new; arrives in the next release): new vehicle parts for
+  [reNut](https://github.com/masterspike52/reNut), the native PC version. Part files in the workspace's
+  `renut\parts` folder, your own OBJ models built from `renut\models.json` into bundles of the mod's own (with
+  collision, footprints, textures and wheels that spin), a checker that reads the parts the way reNut does, and
+  *Create Distributable Patch* packs them into the `.nbpatch`.
+- **Combining mods:** mods that touch the same file are merged asset by asset, conflicts are named down to the asset,
+  and *world edits* replay on top of other mods.
+- **[NB Multiplayer](https://github.com/weighta/NB-Multiplayer)** puts it all in a mod library: combine your mods into
+  editions and play them online with friends, including Showdown Town co-op and Character Select. It also installs and
+  updates NB Studio and lists your projects.
 
 Everything is non-destructive: NB Studio works on a **workspace** (a copy of your game), never on your original files,
 and keeps a history of every saved file.
 
-## Screenshots
+## Everything at a glance
 
-<p align="center">
-  <img src="docs/images/studio-materials-1-6.jpg" alt="Clanker's tunnel in Banjoland: NB Studio 1.5, NB Studio 1.6 and the game" width="100%">
-</p>
-<p align="center"><i>Clanker's tunnel in Banjoland. NB Studio 1.6 draws every material with the game's own shader code: the metal panels and sand now look like the game (right) instead of black with glowing blobs (left).</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-palace-rendered.jpg" alt="L.O.G.'s palace in the Rendered view" width="49%">
-  <img src="docs/images/studio-spiral-rendered.jpg" alt="Spiral Mountain in the Rendered view" width="49%">
-</p>
-<p align="center"><i>L.O.G.'s palace and the town's other marker-placed objects, with the afternoon sky dome; Spiral Mountain with its rock and grass tiled as in the game.</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-rendered.jpg" alt="Showdown Town in the Rendered view" width="49%">
-  <img src="docs/images/studio-atmosphere.jpg" alt="The Atmosphere tab" width="49%">
-</p>
-<p align="center"><i>Showdown Town in the Rendered view (game lighting, sky and water), and the Atmosphere tab: sky, light and fog for every time of day, plus weather.</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-showdown-town.png" alt="Showdown Town in the world editor" width="60%">
-</p>
-<p align="center"><i>Showdown Town in the world editor (terrain, scenery, markers and the AI race route).</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-banjos-house.png" alt="Banjo's House" width="60%">
-</p>
-<p align="center"><i>Banjo's House in the 3D view (NB Studio 1.1.1 decodes its instanced wall meshes correctly).</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-town-viewport.png" alt="Showdown Town viewport" width="70%">
-</p>
-<p align="center"><i>The 3D view: every coloured box is a marker (pickups, actor spawns, triggers); the orange line is the AI path network.</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-logbox.png" alt="LOGBOX 720" width="49%">
-  <img src="docs/images/studio-asset-preview.png" alt="Asset preview" width="49%">
-</p>
-<p align="center"><i>Editing LOGBOX 720 scenery with exact numeric transforms, and previewing a vehicle part model with its draw calls and vertex layouts.</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-texture-library.png" alt="Texture library" width="70%">
-</p>
-<p align="center"><i>The texture library of a Showdown Town building: export, replace, or edit externally and re-apply.</i></p>
-
-<p align="center">
-  <img src="docs/images/studio-folder-analysis.png" alt="Create Patch from a Modified Game Folder" width="49%">
-  <img src="docs/images/studio-folder-details.png" alt="The mod's details, filled in" width="49%">
-</p>
-<p align="center"><i>Create Patch from a Modified Game Folder: what a hand-modded folder changes, asset by asset, and the mod details NB Studio fills in from it.</i></p>
-
-<p align="center">
-  <img src="docs/images/snowy-night.jpg" alt="Snowy Showdown Town" width="49%">
-  <img src="docs/images/snowy-times-of-day.jpg" alt="Snowy Showdown Town at four times of day" width="49%">
-</p>
-<p align="center"><i>Snowy Showdown Town, the first official map mod (bundled with NB Multiplayer), made with these tools: snow textures, holly and bunting, camera-following snowfall and winter light, fog and skies. Recipe: <code>snow/build.sh</code>.</i></p>
+| Area | What you can do |
+|---|---|
+| **Worlds** | Every world and Act, with terrain, scenery, water, grass, sky domes, markers, AI paths, collision and the objects placed at markers drawn with their real models. Wireframe, Solid, Textured and Rendered (the game's own shaders and lighting). |
+| **Editing** | G / R / S (T) with axis locks and typed values, gizmo, multi-select, hide/unhide, duplicate, delete, lift and place (Ctrl+X / Ctrl+V), undo/redo of everything, Ctrl+S saves all. |
+| **Copy and paste** | Self-contained copies between worlds and workspaces, with their models, textures, lightmaps and collision. |
+| **Collision** | View all collision; edit it triangle by triangle; add boxes, ramps and planes; build from render meshes; import OBJ/FBX collision. |
+| **Markers and paths** | Actor spawns, pickups, volumes, script triggers, player starts, AI race routes and AI vehicles on your own routes. |
+| **Cameras** | Warp-pad, bolt-head, Jiggy Bank and info-point cameras; cut-scene camera paths with editable keys. |
+| **Atmosphere** | Sky, light, fog and sun direction per time of day and per Act, live 3D preview, live preview in the running game, falling snow. |
+| **Music** | Showdown Town's 32 music regions, the 133 tracks, replacing music with your own songs. |
+| **Vehicles** | Vehicle Editor: game vehicles, Xbox 360 vehicle saves, drag-and-drop parts, paint, settings, checks, My Vehicle Saves. Part Importer for new parts. |
+| **Characters** | Animations tab (play, scrub, FBX export with skeleton and skin), dialogue lines in every language. |
+| **Assets** | Models (OBJ/FBX export and import), all 14,049 textures, text, wave banks, videos, Tag Editor for raw values. |
+| **Source maps** | Hammer `.vmf` import with baked lightmaps, collision, skybox terrain and memory budget. |
+| **Testing** | F5 straight into the open world or Act at 60 FPS, Shift+F5 from the camera; the Live (game) tab. |
+| **reNut parts** | Custom vehicle parts for reNut: part files, OBJ models with collision and footprints, spinning wheels, checks, packed into `.nbpatch` mods. |
+| **Sharing** | `.nbpatch` mods, mods from modded folders, executable mods, mod combining, NB Multiplayer's mod library. |
+| **Extras** | Xbox 360 Photo Viewer, a guided tour on the first start (*Help > Take the Tour*), `cli/NB.Cli.exe` with over 100 commands. |
 
 ## Installation
 
-1. **Download** the latest `NB-Studio-x.y.z.zip` from the [Releases](../../releases) page and unzip it anywhere.
+1. **Download** the latest `NB-Studio-x.y.z.zip` from the [Releases](https://github.com/weighta/NB-Studio/releases) page and unzip it anywhere.
    (Or let [NB Multiplayer](https://github.com/weighta/NB-Multiplayer) do it: *Projects > Get NB Studio* installs NB
    Studio, keeps it up to date and lists your projects.)
 2. You need **your own copy of the game**, extracted to a folder: the folder that contains `default.xex` and the
    `Bundle` folder (for example extracted from your disc image with *extract-xiso*). NB Studio never changes this folder.
-3. Run **`NBModStudio.exe`**. Requirements: Windows 10/11 64-bit, a GPU with OpenGL 3.3.
-4. For testing your mods, install **[Xenia Canary](https://github.com/xenia-canary/xenia-canary)** and point NB Studio
-   to it the first time you press **Launch in Xenia (F5)**.
+3. Run **`NBModStudio.exe`**. Requirements: Windows 10/11 64-bit, a GPU with OpenGL 3.3. The release is
+   self-contained: no .NET install needed.
+4. For testing, **F5** uses NB's own Xenia build, which comes with [NB Multiplayer](https://github.com/weighta/NB-Multiplayer)
+   (its virtual gamepad is what skips the menus). Without it, NB Studio asks for a
+   [Xenia Canary](https://github.com/xenia-canary/xenia-canary) and starts the game at the title screen.
 
 ## Tutorial: your first mod
 
 **1. Create a workspace.** On the start page choose *New Workspace from Game Directory...*, pick your game folder, then
 an empty folder for the workspace. NB Studio copies the game there (a few minutes, about 7 GB) and indexes its 69,000
-assets.
+assets. First time? NB Studio offers a 2-minute tour of the window.
 
 **2. Open a world.** The *Worlds* list shows every world and Act. Double-click **Showdown Town**. The 3D view opens:
 right-drag to look around, WASD/QE to fly (Shift = fast), mouse wheel to dolly, middle-drag to pan, F to focus the selection.
@@ -153,8 +327,8 @@ The buttons in the top-right corner switch between Wireframe, Solid, Textured an
 
 **3. Move something.** Click a piece of scenery (for example a café table near Mumbo's Motors). Press **G** and move
 the mouse, then click to drop it; press **X**, **Y** or **Z** while moving to slide along one axis only, or type a number
-(G, Z, 3.5, Enter moves it 3.5 units up). **R** rotates and **S** scales the same way. You can also drag the gizmo's
-arrows (Move 1 / Rotate 2 / Scale 3), or type exact numbers in *Properties* and press *Apply*. Ctrl+Z undoes.
+(G, Z, 3.5, Enter moves it 3.5 units up). **R** rotates and **S** (or **T**) scales the same way. You can also drag the
+gizmo's arrows (Move 1 / Rotate 2 / Scale 3), or type exact numbers in *Properties* and press *Apply*. Ctrl+Z undoes.
 
 **4. Change a texture.** Right-click the object and choose *Textures... (view / export / replace)*. The texture library shows every texture the
 model uses (*World > Texture Library* shows every texture of the world). Select one, *Export PNG*, paint over it, then *Replace...* with your image (tick *Only this model* to
@@ -164,17 +338,14 @@ leave other models that share the texture alone).
 replaces the object's model, importing the file's materials and textures. For collision use *Import Collision
 (OBJ/FBX)...*.
 
-**6. Save and test.** *Save World (Ctrl+S)* writes the changed bundle into your workspace. *Launch in Xenia (F5)*
-starts the game from the workspace. *Tools > Test Mode: Skip Intro* makes a new game start straight in Showdown Town (about 40
-seconds from launch).
+**6. Save and test.** **Ctrl+S** (*Save All*) writes your changes into the workspace. **F5** (*Test in Xenia*) starts
+the game right in the world you have open.
 
 **7. Share it.** *Build > Create Distributable Patch (.nbpatch)...* asks what the mod is (name, version, category,
 tags, whether multiplayer players need it, description; the category starts as a guess from the files you changed) and
 writes a `.nbpatch`. Other players apply it with *Build > Apply Patch to a Game Directory...* (it checks their files
 first and keeps a backup; *Roll Back Patches* undoes it), or add it to the mod library of
 [NB Multiplayer](https://github.com/weighta/NB-Multiplayer), combine it with other mods and tweaks, and play it online.
-
-<p align="center"><img src="docs/images/studio-export-dialog.png" alt="Create Distributable Patch" width="60%"></p>
 
 ## How the tool works
 
@@ -341,8 +512,8 @@ moving all three positions (`+0x00`, `+0x10`, `+0x20`) together teleports it. Th
 Requirements: Windows 10/11, the [.NET 9 SDK](https://dotnet.microsoft.com/download).
 
 ```bash
-git clone https://github.com/weighta/NB-Studio-Banjo-Kazooie-Nuts-and-Bolts-World-Editor-.git
-cd NB-Studio-Banjo-Kazooie-Nuts-and-Bolts-World-Editor-
+git clone https://github.com/weighta/NB-Studio.git
+cd NB-Studio
 dotnet build NBModTool.sln -c Release
 ```
 
@@ -363,15 +534,17 @@ The editor is `src/NB.Studio/bin/Release/net9.0-windows/NBModStudio.exe`, and th
 
 Play Nuts & Bolts online and in Showdown Town co-op with friends, including games modded with NB Studio:
 **[weighta/NB-Multiplayer](https://github.com/weighta/NB-Multiplayer)**. It keeps a mod library where your mods are
-listed by category and combined into editions, installs and updates NB Studio, and lists your projects. Its app is built from `src/NB.Multiplayer` in
-this repository. It also lists your NB Studio projects (NB Studio records every project it opens in
-`%APPDATA%\NBModTool\projects.json`), opens them here, and turns them into mods for its mod library.
+listed by category and combined into editions, installs and updates NB Studio, and lists your projects. Its app is built
+from `src/NB.Multiplayer` in this repository. It lists your NB Studio projects (NB Studio records every project it opens
+in `%APPDATA%\NBModTool\projects.json`), opens them here, and turns them into mods for its mod library.
 
 ## Credits and legal
 
 * Created by **weighta**.
+* reNut custom parts support by **[masterspike52](https://github.com/masterspike52)** (the reNut author).
 * Texture tiling follows the [Xenia](https://github.com/xenia-project/xenia) project's documentation of the Xbox 360
-  GPU; audio decoding uses [vgmstream](https://github.com/vgmstream/vgmstream).
+  GPU; audio decoding uses [vgmstream](https://github.com/vgmstream/vgmstream). The 60 FPS test option is based on
+  Margen67's 60 FPS patch.
 * NB Studio is licensed under the [MIT license](LICENSE).
 * *Banjo-Kazooie: Nuts & Bolts* is © Microsoft and Rare. This is an unofficial fan project, not affiliated with or
   endorsed by them. It contains no game data; you need your own copy of the game.
