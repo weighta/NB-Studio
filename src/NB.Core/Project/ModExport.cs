@@ -68,6 +68,8 @@ public static class ModExport
             var man = PatchPackage.BuildFromFolders(rep, outPath, name, Author(mods), Description(mods, name),
                 new Progress<(string File, double Fraction)>(p => progress?.Report(($"Writing {p.File}", 0.7 + 0.28 * p.Fraction))),
                 m => Configure(m, mods, name));
+            // reNut custom parts are not game files: the flattened diff doesn't have them
+            PatchPackage.CopyRenutParts(outPath, mods.Select(m => m.Path));
             WriteReadme(outPath, man, mods);
             progress?.Report(("Done", 1));
             return new Result(outPath, man, true, Notes(man));

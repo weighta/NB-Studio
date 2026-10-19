@@ -1640,6 +1640,37 @@ static class Program
                     NB.Core.Project.AssetIndex.LoadOrBuild(ws, null, true);
                     return 0;
                 }
+                case "renut-models":
+                {
+                    // renut-models <workspace> [models.json]: models / collision / footprints (and textures) of reNut custom
+                    // parts, built into the mod's own bundles (NB.Core.Parts.RenutModels); default <workspace>/renut/models.json.
+                    // Part files go in <workspace>/renut/parts.
+                    var ws = NB.Core.Project.Workspace.Open(args[1]);
+                    string specPath = args.Length > 2 ? args[2] : NB.Core.Parts.RenutModels.SpecPath(ws);
+                    var spec = NB.Core.Parts.RenutModels.LoadSpec(specPath);
+                    foreach (var l in NB.Core.Parts.RenutModels.Build(ws, spec, Path.GetDirectoryName(Path.GetFullPath(specPath))!)) Console.WriteLine("  " + l);
+                    Console.WriteLine($"part files: {NB.Core.Parts.RenutModels.PartsFolder(ws)} (exported as parts/*)");
+                    return 0;
+                }
+                case "renut-check":
+                {
+                    // renut-check <workspace>: checks the reNut part files in <workspace>/renut/parts
+                    var ws = NB.Core.Project.Workspace.Open(args[1]);
+                    var specPath = NB.Core.Parts.RenutModels.SpecPath(ws);
+                    var spec = File.Exists(specPath) ? NB.Core.Parts.RenutModels.LoadSpec(specPath) : null;
+                    var (problems, parts) = NB.Core.Parts.RenutModels.CheckParts(ws, spec);
+                    foreach (var p in problems) Console.WriteLine("  " + p);
+                    Console.WriteLine($"{parts} part file(s), {problems.Count} problem(s)");
+                    return problems.Count == 0 ? 0 : 1;
+                }
+                case "renut-materials":
+                {
+                    // renut-materials <workspace> <template model> [--turning]: a shipped part model's colour textures (models.json
+                    // "materials"); --turning: only those on a wheel's turning part (for "spins")
+                    var ws = NB.Core.Project.Workspace.Open(args[1]);
+                    foreach (var s in NB.Core.Parts.RenutModels.TemplateMaterials(ws, args[2], args.Contains("--turning"))) Console.WriteLine(s);
+                    return 0;
+                }
                 case "grouping-add":
                 {
                     // grouping-add <workspace> <garagegrouping asset> <new size key> <new label key> [copy-from size key]

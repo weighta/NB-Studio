@@ -120,6 +120,7 @@ public static class PatchPackage
         using (var zip = ZipFile.Open(outPath, ZipArchiveMode.Create))
         {
             AddFiles(zip, man, files, ws.Game.Root, ws.Original.Root, progress);
+            AddRenutParts(zip, Parts.RenutModels.PartsFolder(ws));
             if (includeExeMods)
             {
                 foreach (var id in ws.Manifest.ExeMods)
@@ -140,6 +141,39 @@ public static class PatchPackage
             using (var w = new StreamWriter(readme.Open())) w.Write(Readme(man));
         }
         return man;
+    }
+
+    /// <summary>Entry folder of reNut custom parts (*.json, their scripts and records), which a reNut mods folder reads.</summary>
+    public const string RenutPartsEntry = "parts/";
+
+    /// <summary>
+    /// reNut custom parts: every file of <paramref name="folder"/> (a workspace's renut/parts) stored as a parts/&lt;name&gt;
+    /// entry. They are not game files (not in <see cref="PatchManifest.Files"/>): only reNut reads them.
+    /// </summary>
+    static void AddRenutParts(ZipArchive zip, string folder)
+    {
+        if (!Directory.Exists(folder)) return;
+        foreach (var f in Directory.GetFiles(folder, "*", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.Ordinal))
+            zip.CreateEntryFromFile(f, RenutPartsEntry + System.IO.Path.GetRelativePath(folder, f).Replace('\\', '/'), CompressionLevel.Optimal);
+    }
+
+    /// <summary>Copies the reNut part entries (parts/*) of <paramref name="sources"/> into <paramref name="patch"/>; the first
+    /// source with an entry of a name wins.</summary>
+    public static void CopyRenutParts(string patch, IEnumerable<string> sources)
+    {
+        using var zip = ZipFile.Open(patch, ZipArchiveMode.Update);
+        var have = zip.Entries.Select(e => e.FullName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var src in sources)
+        {
+            using var sz = ZipFile.OpenRead(src);
+            foreach (var e in sz.Entries.Where(e => e.FullName.StartsWith(RenutPartsEntry, StringComparison.OrdinalIgnoreCase) && e.Length > 0))
+            {
+                if (!have.Add(e.FullName)) continue;
+                using var from = e.Open();
+                using var to = zip.CreateEntry(e.FullName, CompressionLevel.Optimal).Open();
+                from.CopyTo(to);
+            }
+        }
     }
 
     /// <summary>Adds a delta (or new file) per file: <paramref name="gameRoot"/>'s version against <paramref name="origRoot"/>'s.</summary>

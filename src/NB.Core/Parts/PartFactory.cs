@@ -68,6 +68,19 @@ public static class PartFactory
         public string? Attachable { get; set; }
     }
 
+    public sealed class BoxSpec
+    {
+        public float[] Min { get; set; } = Array.Empty<float>();
+        public float[] Max { get; set; } = Array.Empty<float>();
+
+        public (Vector3 Min, Vector3 Max) ToBounds(string model)
+        {
+            if (Min.Length != 3 || Max.Length != 3 || Min[0] >= Max[0] || Min[1] >= Max[1] || Min[2] >= Max[2])
+                throw new ArgumentException($"model {model}: collisionBox is {{ \"min\": [x, y, z], \"max\": [x, y, z] }} with min below max");
+            return (new Vector3(Min[0], Min[1], Min[2]), new Vector3(Max[0], Max[1], Max[2]));
+        }
+    }
+
     public sealed class ModelSpec
     {
         /// <summary>New model id suffix: aid_model_banjox_vehicleparts_&lt;Id&gt;.</summary>
@@ -81,6 +94,9 @@ public static class PartFactory
         /// <summary>Collision: null = the template's convex hull unchanged; "model" = scaled to the OBJ's bounds;
         /// "footprint" = scaled to the part's cells (HkConvexEdit).</summary>
         public string? CollisionFit { get; set; }
+        /// <summary>The collision's box in model space ({ "min": [x, y, z], "max": [x, y, z] }), overriding
+        /// <see cref="CollisionFit"/> (reNut parts, <see cref="RenutModels"/>).</summary>
+        public BoxSpec? CollisionBox { get; set; }
         /// <summary>Texture stem → "r,g,b": recolour the pixel constants of the draws using it (ModelEdit.TintConstants).</summary>
         public Dictionary<string, string> Tint { get; set; } = new();
         /// <summary>OBJ material → template texture stem it replaces (e.g. "shared_materials_metal_components_plaindetailed_colour_0x01ede525").</summary>
@@ -92,6 +108,9 @@ public static class PartFactory
         /// <summary>Vertex buffers drawn only on non-LOD nodes (the template's animated moving parts): true = left untouched
         /// (they keep moving), false = hidden (the new geometry never goes there).</summary>
         public bool KeepAnimated { get; set; } = false;
+        /// <summary>The new geometry goes on the template's moving pieces only (a wheel's turning rim and tyre), so it turns
+        /// with them; the rest of the template draws nothing.</summary>
+        public bool Spins { get; set; } = false;
         /// <summary>Resident bundles to add the model to (hex); default: every bundle holding the template's model.</summary>
         public List<string>? Bundles { get; set; }
     }
@@ -150,26 +169,11 @@ public static class PartFactory
             var bundles = p.Model.Bundles?.Select(x => Convert.ToUInt32(x, 16)).ToList()
                           ?? idx.Entries.Where(e => e.Name == tplModel && !e.Streamed).Select(e => e.Bundle).Distinct().ToList();
             string P(string rel) => Path.IsPathRooted(rel) ? rel : Path.Combine(baseDir, rel);
-            var meshes = string.IsNullOrEmpty(p.Model.Obj) ? null : ObjReader.ReadAny(P(p.Model.Obj));   // none: retexture only
-            if (meshes != null && !string.IsNullOrEmpty(p.Model.PreRotate))
-            {
-                var rot = Matrix4x4.Identity;
-                foreach (var r0 in p.Model.PreRotate.Split(';', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    var kv = r0.Split(':'); float a = float.Parse(kv[1], System.Globalization.CultureInfo.InvariantCulture) * MathF.PI / 180;
-                    rot *= kv[0].Trim().ToLowerInvariant() switch { "x" => Matrix4x4.CreateRotationX(a), "y" => Matrix4x4.CreateRotationY(a), _ => Matrix4x4.CreateRotationZ(a) };
-                }
-                foreach (var m in meshes)
-                {
-                    for (int i = 0; i < m.Positions.Count; i++) m.Positions[i] = Vector3.Transform(m.Positions[i], rot);
-                    if (m.Normals != null) for (int i = 0; i < m.Normals.Count; i++) m.Normals[i] = Vector3.TransformNormal(m.Normals[i], rot);
-                }
-            }
+            var meshes = ReadMeshes(p.Model, baseDir);   // null: retexture only
             string tplHavok = "aid_havok_" + tplModel["aid_model_".Length..], newHavok = HavokAsset(p.Model.Id);
             (Vector3 Min, Vector3 Max)? fit = null;
             if (p.Model.CollisionFit == "model" && meshes != null)
-                fit = (new Vector3(meshes.Min(m => m.Bounds().Min.X), meshes.Min(m => m.Bounds().Min.Y), meshes.Min(m => m.Bounds().Min.Z)),
-                       new Vector3(meshes.Max(m => m.Bounds().Max.X), meshes.Max(m => m.Bounds().Max.Y), meshes.Max(m => m.Bounds().Max.Z)));
+                fit = Bounds(meshes);
             else if (p.Model.CollisionFit == "footprint")
             {
                 string an = p.Attach != null ? AttachPrefix + p.Attach.Template : idx.Entries.FirstOrDefault(e => e.Id == BE.U32(cc.PartsOf(tsym).First(x => cc.SectionOf(x).Name == ".data").Data, 0x12C))?.Name ?? "";
@@ -177,17 +181,10 @@ public static class PartFactory
                 if (ae != null)
                 {
                     var ac = ws.LoadResident(ae.Bundle);
-                    var fp = AttachData.Parse(ac.PartsOf(ae.Symbol).First(x => ac.SectionOf(x).Name == ".data").Data);
-                    fit = (new Vector3(fp.XMin - 0.5f, fp.YMin - 0.5f, fp.ZMin - 0.5f) * 0.98f, new Vector3(fp.XMax + 0.5f, fp.YMax + 0.5f, fp.ZMax + 0.5f) * 0.98f);
+                    fit = FootprintBounds(AttachData.Parse(ac.PartsOf(ae.Symbol).First(x => ac.SectionOf(x).Name == ".data").Data));
                 }
             }
-            string FitCollision(CaffFile caff, int hs)
-            {
-                if (fit == null) return "template collision";
-                var d = caff.PartsOf(hs).First(x => caff.SectionOf(x).Name == ".data").Data;
-                int n = NB.Core.Havok.HkConvexEdit.FitTo(d, fit.Value.Min, fit.Value.Max);
-                return n > 0 ? $"collision fitted to {fit.Value.Min:0.00}..{fit.Value.Max:0.00}" : "collision: no convex shape to fit";
-            }
+            string FitCollision(CaffFile caff, int hs) => PartFactory.FitCollision(caff, hs, fit);
             void AddTextures(CaffFile caff)
             {
                 foreach (var (tn, png) in p.Model.Textures)
@@ -230,41 +227,7 @@ public static class PartFactory
             log.AddRange(AddStreamed(ws, common, tplHavok, newHavok, fit == null ? null : FitCollision));
             cc = ws.LoadResident(common);
 
-            void Tint(CaffFile caff, int nm)
-            {
-                foreach (var (stem, rgb) in p.Model.Tint)
-                {
-                    var c = rgb.Split(',').Select(x => float.Parse(x, System.Globalization.CultureInfo.InvariantCulture)).ToArray();
-                    ModelEdit.TintConstants(caff, nm, stem.Replace("aid_texture_banjox_", ""), new Vector3(c[0], c[1], c[2]));
-                }
-            }
-            // retarget + OBJ import into model symbol nm of caff (a resident bundle or a streamed copy)
-            string ImportInto(CaffFile caff, int nm, bool resident)
-            {
-                foreach (var (from, to) in p.Model.Retarget)
-                    ModelEdit.RetargetTexture(caff, nm, from, to, p.Model.Textures.ContainsKey(to) ? true : null, requireInBundle: resident);
-                if (meshes == null) { Tint(caff, nm); return $"template geometry, {p.Model.Retarget.Count} texture(s) retargeted"; }
-                // OBJ materials → the (retargeted) diffuse stems of the draws that held the template texture
-                var ma = Models.ModelAsset.Parse(caff, nm);
-                string Final(string tplStem) => p.Model.Retarget.TryGetValue(tplStem, out var t) ? ObjExporter.TextureFileStem(t.Replace("aid_texture_banjox_", "")) : tplStem;
-                var stems = ma.Draws.Select(x => ObjExporter.DiffuseTexture(x)).Where(x => x != null).Select(x => ObjExporter.TextureFileStem(x!)).Distinct().ToList();
-                var named = new List<ImportMesh>();
-                foreach (var m in meshes)
-                {
-                    if (!p.Model.Materials.TryGetValue(m.Name, out var tstem)) throw new InvalidDataException($"OBJ material '{m.Name}' has no template material mapping");
-                    string want = Final(tstem);
-                    string? hit = stems.FirstOrDefault(s => s.Equals(want, StringComparison.OrdinalIgnoreCase) || s.EndsWith(want, StringComparison.OrdinalIgnoreCase) || want.EndsWith(s, StringComparison.OrdinalIgnoreCase));
-                    if (hit == null) throw new InvalidDataException($"material '{m.Name}' → '{want}' is not a diffuse texture of the model ({string.Join(", ", stems)})");
-                    named.Add(new ImportMesh { Name = hit, Positions = m.Positions, Normals = m.Normals, UVs = m.UVs, Triangles = m.Triangles });
-                }
-                var lodNodes = ma.LodLevels.SelectMany(g => g.SelectMany(l => l.Nodes)).ToHashSet();
-                var animated = ma.Draws.GroupBy(x => x.VbRecord).Where(g => g.Any(x => !lodNodes.Contains(x.Node) && x.Node > 3)).Select(g => g.Key).ToHashSet();
-                var keep = p.Model.KeepAnimated ? animated : null;
-                var r = ModelImporter.Replace(caff, nm, named, false, keep, p.Model.KeepAnimated ? null : animated);
-                ModelEdit.SetLodDistances(caff, nm, 1e6f, 1f, keepLod0: true);
-                Tint(caff, nm);
-                return $"{r.Vertices} vertices, {r.Triangles} triangles; {animated.Count} animated buffer(s) {(p.Model.KeepAnimated ? "kept" : "hidden")}";
-            }
+            string ImportInto(CaffFile caff, int nm, bool resident) => ImportModel(caff, nm, p.Model, meshes, resident);
         }
         else ws.SaveResident(common, cc, $"part {p.Id}: record");
 
@@ -286,6 +249,112 @@ public static class PartFactory
         foreach (var (set, n) in p.Blocksets) log.Add(AddToBlockset(ws, idx, "aid_misc_banjox_blockset_" + set, recId, (uint)n));
         if (p.NetworkEnum) log.Add(AddNetworkEnum(ws, recId));
         return log;
+    }
+
+    /// <summary>The OBJ of <paramref name="m"/> turned by its <see cref="ModelSpec.PreRotate"/>; null when it has none
+    /// (retexture only).</summary>
+    public static List<ImportMesh>? ReadMeshes(ModelSpec m, string baseDir)
+    {
+        if (string.IsNullOrEmpty(m.Obj)) return null;
+        var meshes = ObjReader.ReadAny(Path.IsPathRooted(m.Obj) ? m.Obj : Path.Combine(baseDir, m.Obj));
+        if (string.IsNullOrEmpty(m.PreRotate)) return meshes;
+        var rot = Matrix4x4.Identity;
+        foreach (var r0 in m.PreRotate.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var kv = r0.Split(':'); float a = float.Parse(kv[1], System.Globalization.CultureInfo.InvariantCulture) * MathF.PI / 180;
+            rot *= kv[0].Trim().ToLowerInvariant() switch { "x" => Matrix4x4.CreateRotationX(a), "y" => Matrix4x4.CreateRotationY(a), _ => Matrix4x4.CreateRotationZ(a) };
+        }
+        foreach (var mesh in meshes)
+        {
+            for (int i = 0; i < mesh.Positions.Count; i++) mesh.Positions[i] = Vector3.Transform(mesh.Positions[i], rot);
+            if (mesh.Normals != null) for (int i = 0; i < mesh.Normals.Count; i++) mesh.Normals[i] = Vector3.TransformNormal(mesh.Normals[i], rot);
+        }
+        return meshes;
+    }
+
+    public static (Vector3 Min, Vector3 Max) Bounds(List<ImportMesh> meshes) =>
+        (new Vector3(meshes.Min(m => m.Bounds().Min.X), meshes.Min(m => m.Bounds().Min.Y), meshes.Min(m => m.Bounds().Min.Z)),
+         new Vector3(meshes.Max(m => m.Bounds().Max.X), meshes.Max(m => m.Bounds().Max.Y), meshes.Max(m => m.Bounds().Max.Z)));
+
+    /// <summary>A footprint's cells as a box, a little inside them (collision fitted to the footprint).</summary>
+    public static (Vector3 Min, Vector3 Max) FootprintBounds(AttachData fp) =>
+        (new Vector3(fp.XMin - 0.5f, fp.YMin - 0.5f, fp.ZMin - 0.5f) * 0.98f, new Vector3(fp.XMax + 0.5f, fp.YMax + 0.5f, fp.ZMax + 0.5f) * 0.98f);
+
+    /// <summary>Fits collision asset <paramref name="hs"/>'s convex shapes to <paramref name="fit"/> (null: left as it is).</summary>
+    public static string FitCollision(CaffFile caff, int hs, (Vector3 Min, Vector3 Max)? fit)
+    {
+        if (fit == null) return "template collision";
+        var d = caff.PartsOf(hs).First(x => caff.SectionOf(x).Name == ".data").Data;
+        int n = NB.Core.Havok.HkConvexEdit.FitTo(d, fit.Value.Min, fit.Value.Max);
+        return n > 0 ? $"collision fitted to {fit.Value.Min:0.00}..{fit.Value.Max:0.00}" : "collision: no convex shape to fit";
+    }
+
+    /// <summary>
+    /// Retargets model <paramref name="nm"/>'s textures (<see cref="ModelSpec.Retarget"/>), imports <paramref name="meshes"/>
+    /// (null: keeps the template's geometry) and tints it. <paramref name="resident"/>: the model sits in a resident bundle,
+    /// which must hold the textures it is retargeted to; false for streamed copies (Bundle/50 models find their textures by
+    /// name among the resident bundles).
+    /// </summary>
+    public static string ImportModel(CaffFile caff, int nm, ModelSpec spec, List<ImportMesh>? meshes, bool resident)
+    {
+        foreach (var (from, to) in spec.Retarget)
+            ModelEdit.RetargetTexture(caff, nm, from, to, spec.Textures.ContainsKey(to) ? true : null, requireInBundle: resident);
+        if (meshes == null) { Tint(caff, nm, spec); return $"template geometry, {spec.Retarget.Count} texture(s) retargeted"; }
+        // OBJ materials → the (retargeted) diffuse stems of the draws that held the template texture
+        var ma = Models.ModelAsset.Parse(caff, nm);
+        var lodNodes = ma.LodLevels.SelectMany(g => g.SelectMany(l => l.Nodes)).ToHashSet();
+        var animated = ma.Draws.GroupBy(x => x.VbRecord).Where(g => g.Any(x => !lodNodes.Contains(x.Node) && x.Node > 3)).Select(g => g.Key).ToHashSet();
+        var turning = TurningBuffers(ma);
+        string Final(string tplStem) => spec.Retarget.TryGetValue(tplStem, out var t) ? ObjExporter.TextureFileStem(t.Replace("aid_texture_banjox_", "")) : tplStem;
+        var stems = ma.Draws.Where(x => !spec.Spins || turning.Contains(x.VbRecord)).Select(x => ObjExporter.DiffuseTexture(x)).Where(x => x != null)
+            .Select(x => ObjExporter.TextureFileStem(x!)).Distinct().ToList();
+        string which = spec.Spins ? "a colour texture on the template's turning part" : "a diffuse texture of the model";
+        var named = new List<ImportMesh>();
+        foreach (var m in meshes)
+        {
+            if (!spec.Materials.TryGetValue(m.Name, out var tstem)) throw new InvalidDataException($"OBJ material '{m.Name}' has no template material mapping ({string.Join(", ", stems)})");
+            string want = Final(tstem);
+            string? hit = stems.FirstOrDefault(s => s.Equals(want, StringComparison.OrdinalIgnoreCase) || s.EndsWith(want, StringComparison.OrdinalIgnoreCase) || want.EndsWith(s, StringComparison.OrdinalIgnoreCase));
+            if (hit == null) throw new InvalidDataException($"material '{m.Name}' → '{want}' is not {which} ({string.Join(", ", stems)})");
+            named.Add(new ImportMesh { Name = hit, Positions = m.Positions, Normals = m.Normals, UVs = m.UVs, Triangles = m.Triangles });
+        }
+        HashSet<int>? keep = null, exclude;
+        if (spec.Spins)
+        {
+            if (turning.Count == 0) throw new InvalidDataException($"model {spec.Id}: \"spins\": the template has no turning part (use a wheel)");
+            exclude = ma.Draws.Select(x => x.VbRecord).Where(vb => !turning.Contains(vb)).ToHashSet();
+        }
+        else
+        {
+            keep = spec.KeepAnimated ? animated : null;
+            exclude = spec.KeepAnimated ? null : animated;
+        }
+        var r = ModelImporter.Replace(caff, nm, named, false, keep, exclude);
+        ModelEdit.SetLodDistances(caff, nm, 1e6f, 1f, keepLod0: true);
+        Tint(caff, nm, spec);
+        return $"{r.Vertices} vertices, {r.Triangles} triangles; " +
+               (spec.Spins ? "on the moving pieces" : $"{animated.Count} animated buffer(s) {(spec.KeepAnimated ? "kept" : "hidden")}");
+    }
+
+    /// <summary>
+    /// A wheel's turning part: vertex buffers drawn on rendergraph nodes outside the LOD table (moving pieces), none of whose
+    /// draws hang on a LOD table node. A buffer drawn on LOD table nodes (a wheel's distant-LOD rim) shows with one wheel but
+    /// not once the game pairs two wheels into an axle (seen in reNut).
+    /// </summary>
+    public static HashSet<int> TurningBuffers(Models.ModelAsset ma)
+    {
+        var lodNodes = ma.LodLevels.SelectMany(g => g.SelectMany(l => l.Nodes)).ToHashSet();
+        return ma.Draws.GroupBy(x => x.VbRecord)
+            .Where(g => g.Any(x => !lodNodes.Contains(x.Node) && x.Node > 3) && !g.Any(x => lodNodes.Contains(x.Node))).Select(g => g.Key).ToHashSet();
+    }
+
+    static void Tint(CaffFile caff, int nm, ModelSpec spec)
+    {
+        foreach (var (stem, rgb) in spec.Tint)
+        {
+            var c = rgb.Split(',').Select(x => float.Parse(x, System.Globalization.CultureInfo.InvariantCulture)).ToArray();
+            ModelEdit.TintConstants(caff, nm, stem.Replace("aid_texture_banjox_", ""), new Vector3(c[0], c[1], c[2]));
+        }
     }
 
     /// <summary>

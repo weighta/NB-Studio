@@ -531,6 +531,7 @@ public sealed partial class MainForm : Form
         build.DropDownItems.Add(new ToolStripSeparator());
         build.DropDownItems.Add("Build Scene from JSON… (custom world: terrain, models, textures, water, markers)", null, async (_, _) => await BuildScene(null));
         build.DropDownItems.Add("Create Distributable Patch (.nbpatch)…", null, async (_, _) => await CreatePatch());
+        build.DropDownItems.Add(RenutPartsMenu());
         build.DropDownItems.Add("Create Patch from a Modified Game Folder…", null, async (_, _) => await CreatePatchFromFolder());
         build.DropDownItems.Add("Apply Patch to a Game Directory…", null, async (_, _) => await ApplyPatch());
         build.DropDownItems.Add("Roll Back Patches in a Game Directory…", null, (_, _) => RollbackPatch());
@@ -1076,6 +1077,7 @@ public sealed partial class MainForm : Form
     async Task CreatePatch(Func<Panels.PatchInfoDialog, Task<string?>>? script = null)
     {
         if (_ws == null) return;
+        if (script == null && !await RenutBeforePatch()) return;
         if (_scene != null && _scene.Objects.Any(o => o.Dirty)) Log("Note: unsaved world edits are not in the patch (World > Save first).");
         if (_atmos.HasUnsaved) Log("Note: unsaved sky, light and fog changes are not in the patch (Atmosphere > Save to Workspace first).");
         var changed = _ws.ModifiedFiles(hash: false);
